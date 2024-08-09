@@ -1,0 +1,96 @@
+import os
+import json
+import pathlib
+import requests
+from datetime import datetime, timedelta
+import argparse
+import logging
+from utils.utils import file_exists_and_has_data
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("fetch_bike_data.log"),  # Log to a file
+        logging.StreamHandler()                      # Log to the console
+    ]
+)
+
+def fetch_data(date: datetime):
+    start_date = date.strftime("%Y%m%d00")
+    end_date = date.strftime("%Y%m%d23")
+    url = "https://api.raccoon.bike/activity"
+    params = {
+        "system": "bike_share_toronto",
+        "start": f"{start_date}",
+        "end": f"{end_date}",
+        "frequency": "h",
+    }
+
+    response = requests.get(url, params=params)
+
+    return response
+
+
+def fetch_and_write_data(
+    path: pathlib.Path, date: datetime, overwrite=False, *args, **kwargs
+):
+    # Data is partitioned by Year/Month/Day
+    # Where the data will be written
+    data_dir = path / date.strftime("%Y/%m/%d")
+    data_path = path / date.strftime("%Y/%m/%d/data.json")
+
+    # Make a directory to store the data
+    os.makedirs(data_dir, exist_ok=True)
+
+    # Check if a file already exists in this location and has something in it
+    if file_exists_and_has_data(file_path=data_path):
+        skipped_date = date.strftime('%Y-%m-%d')
+        logging.info(f"Data already exists for {skipped_date}. Skipping.")
+        return None
+    else:
+        response = fetch_data(date=date)
+        if response.status_code == 200:
+            data = response.json()
+            with open(data_path, "w") as data_file:
+                json.dump(data, data_file, indent=4)
+            succeeding_date = date.strftime('%Y-%m-%d')
+            logging.info(f"Successfully fetched and wrote data for {succeeding_date}.")
+        else:
+            failing_date = date.strftime("%Y/%m/%d")
+            logging.error(f"Call failed for date = {failing_date} with status code {response.status_code} and message: {response.text}")
+
+    return None
+
+
+def main(path, date):
+    date = datetime.strptime(date, "%Y-%m-%d")
+    today = datetime.today()
+
+    while date <= today:
+        fetch_and_write_data(path=pathlib.Path(path), date=date)
+        date += timedelta(days=1)
+
+
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description="Fetch and store bike share data.")
+    
+    parser.add_argument(
+        "--path", 
+        type=str,
+        required=True, 
+        help="The directory path to store data."
+    )
+
+    parser.add_argument(
+        "--date",
+        type=str,
+        required=True,
+        help="The start date in YYYY-MM-DD format.",
+    )
+
+    args = parser.parse_args()
+
+    main(path=args.path, date=args.date)
