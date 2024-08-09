@@ -13,9 +13,10 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler("fetch_bike_data.log"),  # Log to a file
-        logging.StreamHandler()                      # Log to the console
-    ]
+        logging.StreamHandler(),  # Log to the console
+    ],
 )
+
 
 def fetch_data(date: datetime):
     start_date = date.strftime("%Y%m%d00")
@@ -46,23 +47,36 @@ def fetch_and_write_data(
 
     # Check if a file already exists in this location and has something in it
     if file_exists_and_has_data(file_path=data_path):
-        skipped_date = date.strftime('%Y-%m-%d')
+        skipped_date = date.strftime("%Y-%m-%d")
         logging.info(f"Data already exists for {skipped_date}. Skipping.")
         return None
+
     else:
         response = fetch_data(date=date)
+
         if response.status_code == 200:
             data = response.json()
+
             with open(data_path, "w") as data_file:
                 json.dump(data, data_file, indent=4)
-            succeeding_date = date.strftime('%Y-%m-%d')
+
+            succeeding_date = date.strftime("%Y-%m-%d")
             logging.info(f"Successfully fetched and wrote data for {succeeding_date}.")
+
         else:
             failing_date = date.strftime("%Y/%m/%d")
-            logging.error(f"Call failed for date = {failing_date} with status code {response.status_code} and message: {response.text}")
+            logging.error(
+                f"Call failed for date = {failing_date} with status code {response.status_code} and message: {response.text}"
+            )
 
     return None
 
+def valid_date(date_string:str):
+    try:
+        return datetime.strptime(date_string, "%Y-%m-%d")
+    except ValueError:
+        msg = f"Not a valid date: '{date_string}'. Expected format is YYYY-MM-DD."
+        raise argparse.ArgumentTypeError(msg)
 
 def main(path, date):
     date = datetime.strptime(date, "%Y-%m-%d")
@@ -74,19 +88,15 @@ def main(path, date):
 
 
 if __name__ == "__main__":
-    
     parser = argparse.ArgumentParser(description="Fetch and store bike share data.")
-    
+
     parser.add_argument(
-        "--path", 
-        type=str,
-        required=True, 
-        help="The directory path to store data."
+        "--path", type=str, required=True, help="The directory path to store data."
     )
 
     parser.add_argument(
         "--date",
-        type=str,
+        type=valid_date,
         required=True,
         help="The start date in YYYY-MM-DD format.",
     )
