@@ -81,6 +81,9 @@ def valid_date(date_string:str):
         raise argparse.ArgumentTypeError(msg)
 
 def main(path, date):
+
+    logging.info(f'Running source_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}')
+
     today = datetime.today()
 
     while date <= today:
