@@ -1,10 +1,12 @@
-import os
-import json
-import pathlib
-import requests
-from datetime import datetime, timedelta
 import argparse
+import json
 import logging
+import os
+import pathlib
+from datetime import datetime, timedelta
+
+import requests
+
 from utils.utils import file_exists_and_has_data
 
 # Configure logging
@@ -79,7 +81,6 @@ def valid_date(date_string:str):
         raise argparse.ArgumentTypeError(msg)
 
 def main(path, date):
-    date = datetime.strptime(date, "%Y-%m-%d")
     today = datetime.today()
 
     while date <= today:
@@ -91,7 +92,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch and store bike share data.")
 
     parser.add_argument(
-        "--path", type=str, required=True, help="The directory path to store data."
+        "--path", 
+        type=str, 
+        required=True, 
+        help="The directory path to store data.",
+        default='data'
     )
 
     parser.add_argument(
@@ -99,6 +104,7 @@ if __name__ == "__main__":
         type=valid_date,
         required=True,
         help="The start date in YYYY-MM-DD format.",
+        default='2021-01-01'
     )
 
     args = parser.parse_args()
