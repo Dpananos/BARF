@@ -97,7 +97,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--path", 
         type=str, 
-        required=True, 
         help="The directory path to store data.",
         default='data'
     )
@@ -105,9 +104,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--date",
         type=valid_date,
-        required=True,
         help="The start date in YYYY-MM-DD format.",
-        default='2021-01-01'
+        default=datetime(2021, 1, 1)
     )
 
     args = parser.parse_args()
