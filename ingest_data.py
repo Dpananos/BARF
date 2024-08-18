@@ -17,18 +17,22 @@ def ingest_data_fact_tips(conn, file: str):
     try:
         logging.info("Connected to the DuckDB database")
 
-        conn.sql("CREATE TABLE IF NOT EXISTS fact_trips (datetime DATETIME, trips BIGINT)")
+        conn.sql("CREATE TABLE IF NOT EXISTS staging_fact_trips (filename VARCHAR, datetime DATETIME, station_trips BIGINT)")
+
         df = pd.read_json(file)
+        
+        # File will serve as our unique identifier.
+        df['filename'] = file
+        # API returns "station trips" -- with a space.
+        df.columns = [col_name.replace(' ', '_') for col_name in df.columns]
+        df = df[['filename','datetime','station_trips']]
 
-        max_date = df.datetime.max().strftime('%Y-%m-%d')
-        logging.info(f"Max date in the file: {max_date}")
-
-        result = conn.execute(f"SELECT COUNT(*) FROM fact_trips WHERE datetime > '{max_date}'").fetchall()[0][0]
-        logging.info(f"Number of existing records after {max_date}: {result}")
+        result = conn.execute(f"SELECT COUNT(*) FROM staging_fact_trips WHERE filename == '{file}'").fetchall()[0][0]
+        logging.info(f"Number of existing records for {file}: {result}")
 
         if result == 0:
-            conn.sql("INSERT INTO fact_trips SELECT * FROM df")
-            logging.info("Data inserted into fact_trips table")
+            conn.sql("INSERT INTO staging_fact_trips SELECT * FROM df")
+            logging.info("Data inserted into staging_fact_trips table")
             conn.commit()
         else:
             logging.info("Record already ingested, not inserting new data.")
