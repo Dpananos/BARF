@@ -1,5 +1,7 @@
 .DS_Store
 data/*
+*.db
+*.db.wal
 *.log
 *.cpython
 *.pyc
