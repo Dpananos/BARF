@@ -7,3 +7,4 @@ data/*
 *.pyc
 .Rproj.user
 .env
+.venv/

@@ -21,8 +21,12 @@ logging.basicConfig(
 
 
 def fetch_data(date: datetime):
+
+    # Hard code the hours to be the start of the day
     start_date = date.strftime("%Y%m%d00")
+    # Hard code the hours to be the end of the day
     end_date = date.strftime("%Y%m%d23")
+
     url = "https://api.raccoon.bike/activity"
     params = {
         "system": "bike_share_toronto",
@@ -36,9 +40,7 @@ def fetch_data(date: datetime):
     return response
 
 
-def fetch_and_write_data(
-    path: pathlib.Path, date: datetime, overwrite=False, *args, **kwargs
-):
+def fetch_and_write_data(path: pathlib.Path, date: datetime):
     # Data is partitioned by Year/Month/Day
     # Where the data will be written
     data_dir = path / date.strftime("%Y/%m/%d")
