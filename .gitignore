@@ -6,3 +6,4 @@ data/*
 *.cpython
 *.pyc
 .Rproj.user
+.env
