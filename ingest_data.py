@@ -17,8 +17,8 @@ def ingest_data_fact_tips(conn, data_dir: str):
     conn.execute("create database if not exists bike")
     conn.execute("use bike")
     conn.execute("create schema if not exists raw")
-    conn.execute("create table if not exists raw.raw_trip_data (datetime DATETIME, station_trips BIGINT, __inserted_at DATETIME)")
-    conn.execute(f"insert into raw.raw_trip_data  select *, now() as __inserted_at from read_json('{data_dir}/*/*/*/data.json', format='array')")
+    conn.execute("create table if not exists raw.raw_trip_data (datetime DATETIME, station_trips BIGINT, _etl_loaded_at DATETIME)")
+    conn.execute(f"insert into raw.raw_trip_data  select *, now() as _etl_loaded_at from read_json('{data_dir}/*/*/*/data.json', format='array')")
     conn.commit()
 
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     dotenv.load_dotenv('.env')
-    motherduck_token = os.getenv('motherduck_token')
+    motherduck_token = os.getenv('MOTHERDUCK_TOKEN')
     my_string = f"md:?motherduck_token={motherduck_token}"
         
     with duckdb.connect(my_string) as conn:

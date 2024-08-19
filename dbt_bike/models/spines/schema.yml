@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: dim_time_spine_hourly
+    description: Hourly time spine
+
+  - name: dim_time_spine_daily
+    description: Daily time spine

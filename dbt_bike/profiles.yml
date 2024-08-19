@@ -2,12 +2,12 @@ dbt_bike:
   outputs:
     staging:
       type: duckdb
-      path:  "md:bike?motherduck_token={{env_var('motherduck_token')}}"
+      path:  "md:bike?motherduck_token={{env_var('MOTHERDUCK_TOKEN')}}"
       threads: 1
       schema: staging
-    prod:
+    production:
       type: duckdb
-      path:  "md:bike?motherduck_token={{env_var('motherduck_token')}}"
+      path:  "md:bike?motherduck_token={{env_var('MOTHERDUCK_TOKEN')}}"
       threads: 1
       schema: production
   target: staging
