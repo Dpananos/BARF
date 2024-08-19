@@ -9,7 +9,7 @@ import argparse
 # Set up logging
 logging.basicConfig(level=logging.INFO, 
                     format='%(asctime)s - %(levelname)s - %(message)s',
-                    handlers=[logging.FileHandler("data_ingestion.log"),
+                    handlers=[logging.FileHandler("logs/ingest_data.log"),
                               logging.StreamHandler()])
 
 
@@ -17,7 +17,8 @@ def ingest_data_fact_tips(conn, data_dir: str):
     conn.execute("create database if not exists bike")
     conn.execute("use bike")
     conn.execute("create schema if not exists raw")
-    conn.execute(f"create or replace table raw.raw_trip_data as select * from read_json('{data_dir}/*/*/*/data.json', format='array')")
+    conn.execute("create table if not exists raw.raw_trip_data (datetime DATETIME, station_trips BIGINT, __inserted_at DATETIME)")
+    conn.execute(f"insert into raw.raw_trip_data  select *, now() as __inserted_at from read_json('{data_dir}/*/*/*/data.json', format='array')")
     conn.commit()
 
 

@@ -1,0 +1,13 @@
+dbt_bike:
+  outputs:
+    staging:
+      type: duckdb
+      path:  "md:bike?motherduck_token={{env_var('motherduck_token')}}"
+      threads: 1
+      schema: staging
+    prod:
+      type: duckdb
+      path:  "md:bike?motherduck_token={{env_var('motherduck_token')}}"
+      threads: 1
+      schema: production
+  target: staging
