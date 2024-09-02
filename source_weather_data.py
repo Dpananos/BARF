@@ -103,6 +103,7 @@ def fetch_and_write_data(path: pathlib.Path, date: datetime, sleep_length=5.0):
         return None
 
     else:
+
         response = fetch_weather_data(date=date)
 
         if response.status_code == 200:
@@ -140,7 +141,7 @@ def main(path, date, sleep_length):
         f'Running source_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}'
     )
 
-    today = datetime.today()
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 
     while date < today:
         fetch_and_write_data(

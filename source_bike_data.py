@@ -88,7 +88,7 @@ def main(path, date):
         f'Running source_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}'
     )
 
-    today = datetime.today()
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 
     while date < today:
         fetch_and_write_data(path=pathlib.Path(path), date=date)
