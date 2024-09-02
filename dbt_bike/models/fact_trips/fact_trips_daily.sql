@@ -2,12 +2,9 @@
 
 with stg_trips as (
     select 
-    datetime, 
+    datetime as datetime, 
     station_trips 
     from {{ ref('stg_fact_trip')}}
 )
 
-select 
-    datetime, 
-    station_trips
-from stg_trips
+select * from stg_trips

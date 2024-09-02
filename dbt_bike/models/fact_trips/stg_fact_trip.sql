@@ -1,3 +1,6 @@
+{{ config(materialized='table', sort='datetime') }}
+
+
 with source as (
       select * from {{ source('raw', 'raw_trip_data') }}
 ),

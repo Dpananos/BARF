@@ -21,7 +21,6 @@ logging.basicConfig(
 
 
 def fetch_data(date: datetime):
-
     # Hard code the hours to be the start of the day
     start_date = date.strftime("%Y%m%d00")
     # Hard code the hours to be the end of the day
@@ -75,16 +74,19 @@ def fetch_and_write_data(path: pathlib.Path, date: datetime):
 
     return None
 
-def valid_date(date_string:str):
+
+def valid_date(date_string: str):
     try:
         return datetime.strptime(date_string, "%Y-%m-%d")
     except ValueError:
         msg = f"Not a valid date: '{date_string}'. Expected format is YYYY-MM-DD."
         raise argparse.ArgumentTypeError(msg)
 
-def main(path, date):
 
-    logging.info(f'Running source_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}')
+def main(path, date):
+    logging.info(
+        f'Running source_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}'
+    )
 
     today = datetime.today()
 
@@ -97,17 +99,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch and store bike share data.")
 
     parser.add_argument(
-        "--path", 
-        type=str, 
-        help="The directory path to store data.",
-        default='data'
+        "--path", type=str, help="The directory path to store data.", default="data"
     )
 
     parser.add_argument(
         "--date",
         type=valid_date,
         help="The start date in YYYY-MM-DD format.",
-        default=datetime(2021, 1, 1)
+        default=datetime(2021, 1, 1),
     )
 
     args = parser.parse_args()
