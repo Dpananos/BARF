@@ -23,14 +23,14 @@ logging.basicConfig(
 
 def fetch_weather_data(date: datetime):
     start_date = date.strftime("%Y-%m-%d")
-    end_date = (date + timedelta(days=1)).strftime("%Y-%m-%d")
+
 
     url = url = "https://archive-api.open-meteo.com/v1/era5"
     params = {
         "latitude": 43.7001,
         "longitude": -79.4163,
         "start_date": start_date,
-        "end_date": end_date,
+        "end_date": start_date,
         "hourly": [
             "temperature_2m",
             "relative_humidity_2m",

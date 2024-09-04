@@ -1,26 +1,23 @@
-import requests
-import logging
+import os
 
-class APIScraper:
+def count_files_in_directory(directory):
+    file_counts = {}
+    
+    # Traverse the directory tree
+    for root, _, files in os.walk(directory):
+        relative_path = os.path.relpath(root, directory)
+        file_counts[relative_path] = len(files)
+    
+    return file_counts
 
-    def __init__(self, url):
+def print_file_counts(file_counts):
+    for directory, count in file_counts.items():
+        if count==2:
+            pass
+        else:
+            print(f"{directory}: {count} file(s)")
 
-        self.url = url
-
-    def fetch(self, params):
-        response = requests.get(self.url, params=params)
-        return response
-
-    def save_data(self, response, filename):
-
-        if response.status_code == 200:
-            with open(filename, 'w') as file:
-                file.write(response.text)
-
-            logging.info(f"Data saved to {filename}")
-
-        else: 
-            logging.error(f"Failed to fetch data: {response.status_code} and message: {response.text}")
-
-
-
+# Replace 'your_directory' with the path to your target directory
+directory = 'data'
+file_counts = count_files_in_directory(directory)
+print_file_counts(file_counts)

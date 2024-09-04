@@ -31,7 +31,7 @@ def fetch_data(date: datetime):
         "system": "bike_share_toronto",
         "start": f"{start_date}",
         "end": f"{end_date}",
-        "frequency": "d",
+        "frequency": "h",
     }
 
     response = requests.get(url, params=params)

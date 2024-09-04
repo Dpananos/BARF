@@ -1,0 +1,67 @@
+version: 2
+sources:
+  - name: raw
+    database: bike
+    schema: raw
+    freshness:
+      warn_after:
+        count: 7
+        period: day
+      error_after:
+        count: 14
+        period: day
+    loaded_at_field: _etl_loaded_at
+    tables:
+      - name: raw_trip_data
+      - name: raw_weather_data
+
+
+models:
+  - name: stg_weather
+  - name: stg_trips
+    columns:
+      - name: datetime
+        data_tests:
+          - unique
+          - not_null
+        data_tests:
+          - not_null
+          - unique
+      - name: station_trips
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 9999
+              inclusive: true
+      - name: _etl_loaded_at
+        data_tests:
+          - not_null
+  - name: dim_timestamp
+    columns:
+      - name: datetime
+        data_tests:
+          - not_null
+          - unique
+          - all_timestamps:
+              expected_count: 24
+  - name: fact_trips
+    columns:
+      - name: datetime
+        data_tests:
+          - unique
+          - not_null
+          - all_timestamps:
+              expected_count: 24
+      - name: station_trips
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 9999
+              inclusive: true
+  - name: stg_unnested_weather
+    columns:
+      - name: time
+        data_tests:
+          - unique
+          - not_null
+  - name: fact_weather
