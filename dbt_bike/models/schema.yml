@@ -65,3 +65,18 @@ models:
           - unique
           - not_null
   - name: fact_weather
+
+  - name: fact_trips_feature_store
+    columns:
+      - name: toronto_local_time
+        data_tests:
+          - not_null
+          - unique
+          - all_timestamps:
+              expected_count: 24
+      - name: station_trips
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 9999
+              inclusive: true

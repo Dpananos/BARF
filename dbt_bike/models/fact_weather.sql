@@ -15,3 +15,5 @@ with joined_data as (
     order by a.datetime
 )
 
+select * from joined_data
+
