@@ -23,7 +23,7 @@ def ingest_weather_data(conn, data_dir: str):
     )
 
     conn.execute(
-        f"create or replace table raw.raw_weather_forecast_Data as (select *, now() as _etc_loaded_at from read_json('{data_dir}/weather_forecasts/*.json'))"
+        f"create or replace table raw.raw_weather_forecast_data as (select *, now() as _etc_loaded_at from read_json('{data_dir}/weather_forecasts/*.json'))"
     )
 
     conn.execute(
