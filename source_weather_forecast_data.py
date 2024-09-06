@@ -21,17 +21,11 @@ logging.basicConfig(
 )
 
 
-def fetch_weather_data(date: datetime):
+def fetch_weather_forecast_data(date: datetime):
     start_date = date.strftime("%Y-%m-%d")
+    end_date = (date + timedelta(days=14)).strftime("%Y-%m-%d")
 
-
-    url = url = "https://archive-api.open-meteo.com/v1/era5"
-    params = {
-        "latitude": 43.7001,
-        "longitude": -79.4163,
-        "start_date": start_date,
-        "end_date": start_date,
-        "hourly": [
+    weather_vars = [
             "temperature_2m",
             "relative_humidity_2m",
             "dew_point_2m",
@@ -79,7 +73,16 @@ def fetch_weather_data(date: datetime):
             "soil_moisture_9_to_27cm",
             "soil_moisture_27_to_81cm",
             "is_day",
-        ],
+        ]
+    
+    url = "https://api.open-meteo.com/v1/forecast"
+    params = {
+        "latitude": 43.7001,
+        "longitude": -79.4163,
+        "start_date": start_date, 
+        "end_date": end_date,
+        "hourly": weather_vars,
+        "current": weather_vars
     }
 
     response = requests.get(url, params=params)
@@ -87,37 +90,35 @@ def fetch_weather_data(date: datetime):
     return response
 
 
-def fetch_and_write_data(path: pathlib.Path, date: datetime, sleep_length=5.0):
+def fetch_and_write_data(path: pathlib.Path, date: datetime, overwrite: bool = True):
     # Data is partitioned by Year/Month/Day
-    # Where the data will be written
-    data_dir = path / date.strftime("%Y/%m/%d")
-    data_path = path / date.strftime("%Y/%m/%d/weather-data.json")
+    data_dir = path / date.strftime("weather_forecasts")
+    data_path = path / date.strftime("weather_forecasts/as-of-%Y-%m-%d-weather-forecast-data.json")
 
     # Make a directory to store the data
     os.makedirs(data_dir, exist_ok=True)
 
     # Check if a file already exists in this location and has something in it
-    if file_exists_and_has_data(file_path=data_path):
+    if file_exists_and_has_data(file_path=data_path) and not overwrite:
         skipped_date = date.strftime("%Y-%m-%d")
         logging.info(f"Data already exists for {skipped_date}. Skipping.")
         return None
 
     else:
 
-        response = fetch_weather_data(date=date)
+        response = fetch_weather_forecast_data(date=date)
 
         if response.status_code == 200:
             data = response.json()
+            data['created_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             with open(data_path, "w") as data_file:
                 json.dump(data, data_file, indent=4)
 
             succeeding_date = date.strftime("%Y-%m-%d")
             logging.info(
-                f"Successfully fetched and wrote data for {succeeding_date}. Started sleeping at {datetime.now()}. Sleeping for {sleep_length:.2f} seconds."
+                f"Successfully fetched and wrote data for {succeeding_date}."
             )
-
-            sleep(sleep_length)
 
         else:
             failing_date = date.strftime("%Y/%m/%d")
@@ -136,18 +137,14 @@ def valid_date(date_string: str):
         raise argparse.ArgumentTypeError(msg)
 
 
-def main(path, date, sleep_length):
+def main(path, date, overwrite):
     logging.info(
-        f'Running source_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}'
+        f'Running source_weather_forecast_data with following arguments: path={path}, date={date.strftime("%Y-%m-%d")}'
     )
 
-    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 
-    while date < today:
-        fetch_and_write_data(
-            path=pathlib.Path(path), date=date, sleep_length=sleep_length
-        )
-        date += timedelta(days=1)
+
+    fetch_and_write_data(path=pathlib.Path(path), date=date, overwrite=overwrite)
 
 
 if __name__ == "__main__":
@@ -161,16 +158,16 @@ if __name__ == "__main__":
         "--date",
         type=valid_date,
         help="The start date in YYYY-MM-DD format.",
-        default=datetime(2021, 1, 1),
+        default=datetime.now().date(),
     )
 
     parser.add_argument(
-        "--sleep_length",
-        type=int,
-        help="Length of time to sleep before accessing API again.",
-        default=3,
+        "--overwrite",
+        type=bool,
+        help="Overwrite any existing predictions",
+        default=True
     )
 
     args = parser.parse_args()
 
-    main(path=args.path, date=args.date, sleep_length=args.sleep_length)
+    main(path=args.path, date=args.date,overwrite=args.overwrite)
