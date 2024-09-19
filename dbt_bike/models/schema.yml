@@ -14,6 +14,7 @@ sources:
     tables:
       - name: raw_trip_data
       - name: raw_weather_data
+      - name: raw_weather_forecast_data
 
 
 models:
@@ -80,3 +81,5 @@ models:
               min_value: 0
               max_value: 9999
               inclusive: true
+
+  - name: dim_holidays
